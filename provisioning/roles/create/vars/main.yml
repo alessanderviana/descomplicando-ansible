@@ -1,0 +1,9 @@
+---
+# vars file for create
+instance_type: t3.medium
+security_group: giropops
+image: ami-064a0193585662d74
+keypair: descomplicando-ansible
+# profile: alessander
+region: us-east-1
+count: 3
