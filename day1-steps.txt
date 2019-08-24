@@ -1,0 +1,240 @@
+Instalação:
+
+https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-pip
+
+## Configurar chaves SSH
+# No servidor Ansible digite os comandos abaixo
+
+ssh-keygen [Enter até o final]
+ssh-copy-id [user]@[IP]
+
+
+vim /etc/hosts
+
+sudo apt-get install software-properties-common
+sudo apt-add-repository ppa:ansible/ansible
+sudo apt-get update
+sudo apt-get install ansible
+ansible --version
+
+mkdir ansible
+cd ansible
+vim hosts
+
+
+Inventário
+
+Antes você pode fazer ssh elliot-01
+
+-m é módulo
+
+ansible -i hosts all -m ping  # opcional -k pra pedir senha
+
+# hosts
+[giropops]
+elliot-01
+
+[webservers]
+elliot-02
+elliot-03
+
+ansible -i hosts webservers -m ping -u usuario -k
+
+Para executar comandos digite `-a`
+
+ansible -i hosts webservers -a "/sbin/ifconfig"
+
+Executando comandos no bash
+
+ansible -i hosts webservers -a "bash -c 'uptime'"
+ansible -i hosts webservers -m copy -a "scr=hosts dest=/tmp"
+ansible -i hosts webservers -m shell -a "uptime"
+ansible -i hosts webservers -m git -a "repo=https://github.com/badtuxx/giropops-monitoring.git dest=/tmp/giropops version=HEAD"
+ansible -i hosts elliot-02 -m setup
+ansible -i hosts elliot-02 -m setup -a "filter=ansible_distribution"
+
+https://docs.ansible.com/ansible/latest/modules/modules_by_category.html
+
+ansible -i hosts all -m apt -a "name=vim state=present"
+
+Vai dar permission denied
+
+ansible -i hosts all -b -m apt -a "name=vim state=present"
+
+# hosts
+...
+[giropops:vars]
+ansible_python_interpreter=/usr/bin/python3
+
+
+---
+- hosts: webservers
+  become: yes
+  remote_user: ubuntu
+  tasks:
+  - name: Instalando o nginx
+    apt:
+      name: nginx
+      state: latest
+      update_cache: yes
+  - name: Iniciando o nginx
+    service:
+      name: nginx
+      state: started
+  - name: Copiando index.html personalizado
+    template:
+      src: index.html.j2
+      dest: /var/www/html/index.html
+  - name: Copiando nginx.conf
+    copy:
+      src: nginx.conf
+      dest: /etc/nginx/nginx.conf
+    notify: Restartando o Nginx
+  handlers:
+  - name: Restartando o Nginx
+    service:
+      name: nginx
+      state: restarted
+
+
+
+   1  sudo su -
+    2  ssh-add aula-ansible.pem
+    3  ssh 172.31.28.243
+    4  l
+    5  ls
+    6  history
+    7  ssh 172.31.28.243
+    8  ls
+    9  history
+   10  ssh 172.31.31.102
+   11  cd ansible/
+   12  ls
+   13  vim hosts
+   14  ifconfig eth0
+   15  vim /etc/hosts
+   16  sudo vim /etc/hosts
+   17  ping elliot-02
+   18  ping elliot-03
+   19  ping elliot-01
+   20  cat /etc/hosts
+   21  vim hosts
+   22  apt-get install software-properties-common
+   23  sudo apt-get install software-properties-common
+   24  sudo apt-add-repository ppa:ansible/ansible
+   25  apt-get update
+   26  sudo apt-get update
+   27  sudo apt-get install ansible
+   28  ansible--version
+   29  ansible --version
+   30  history
+   31  cat hosts
+   32  vim /etc/ansible/ansible.cfg
+   33  ls
+   34  cat hosts
+   35  ansible -i hosts all -m ping
+   36  ssh elliot-01
+   37  ssh elliot-02
+   38  ssh elliot-03
+   39  ansible -i hosts all -m ping
+   40  ansible -i hosts elliot-03 -m ping
+   41  ansible -i hosts elliot-03 -m ping -k
+   42  vim hosts
+   43  ansible -i hosts giropops -m ping -k
+   44  ansible -i hosts giropops -m ping
+   45  ansible -i hosts webservers -m ping
+   46  sed -i 's/\#deprecation_warnings = True/deprecation_warnings = False/g' /etc/ansible/ansible.cfg
+   47  sudo sed -i 's/\#deprecation_warnings = True/deprecation_warnings = False/g' /etc/ansible/ansible.cfg
+   48  ansible -i hosts giropops -m ping
+   49  ;
+   50  ansible -i hosts webservers -m ping
+   51  ansible -i hosts webservers -a "/sbin/ifconfig"
+   52  ansible -i hosts webservers -a "bash -c 'uptime'"
+   53  ansible -i hosts webservers -m copy "src=hosts dest=/tmp"
+   54  ansible -i hosts webservers -m copy -a "src=hosts dest=/tmp"
+   55  ansible -i hosts webservers -m shell -a "uptime"
+   56  ansible -i hosts webservers -m git -a "repo=https://github.com/badtuxx/giropops-monitoring.git dest=/tmp version=HEAD"
+   57  ansible -i hosts webservers -m git -a "repo=https://github.com/badtuxx/giropops-monitoring.git dest=/tmp/giropops version=HEAD"
+   58  ansible -i hosts webservers -m setup
+   59  ansible -i hosts elliot-02 -m setup
+   60  ansible -i hosts elliot-02 -m setup -a "filter=ansible_distribution"
+   61  ansible -i hosts all -m setup -a "filter=ansible_distribution"
+   62  history
+   63  ansible -i hosts all -m apt -a "name=vim state=present"
+   64  history
+   65  ssh-agent bash
+   66  ansible -i hosts all -m apt -a "name=vim state=present"
+   67  ansible -i hosts all -b -m apt -a "name=vim state=present"
+   68  cd /etc/sudoers.d/
+   69  ls
+   70  sudo su -
+   71  history
+   72  date
+   73  history
+   74  sudo vim /etc/ansible/ansible.cfg
+   75  ansible -i hosts all -m ping
+   76  vim hosts
+   77  ansible -i hosts all -m ping
+   78  vim hosts
+   79  mkdir day1
+   80  ls
+   81  rm -rf day
+   82  vim nginx_playbook.yml
+   83  ansible-playbook -i hosts  nginx_playbook.yml -b
+   84  vim nginx_playbook.yml
+   85  ansible-playbook -i hosts  nginx_playbook.yml -b
+   86  vim nginx_playbook.yml
+   87  vim index.html
+   88  vim nginx_playbook.yml
+   89  ansible-playbook -i hosts  nginx_playbook.yml -b
+   90  vim nginx_playbook.yml
+   91  ansible-playbook -i hosts  nginx_playbook.yml -b
+   92  vim index.html
+   93  ansible-playbook -i hosts  nginx_playbook.yml -b
+   94  vim index.html
+   95  ansible-playbook -i hosts  nginx_playbook.yml -b
+   96  vim nginx_playbook.yml
+   97  ansible-playbook -i hosts  nginx_playbook.yml
+   98  vim nginx_playbook.yml
+   99  history
+  100  cat nginx_playbook.yml
+  101  vim nginx_playbook.yml
+  102  ansible-playbook -i hosts  nginx_playbook.yml
+  103  vim nginx_playbook.yml
+  104  ansible-playbook -i hosts  nginx_playbook.yml
+  105  vim nginx_playbook.yml
+  106  ansible-playbook -i hosts  nginx_playbook.yml
+  107  vim nginx_playbook.yml
+  108  vim nginx.conf
+  109  vim nginx_playbook.yml
+  110  ansible-playbook -i hosts  nginx_playbook.yml
+  111  vim nginx_playbook.yml
+  112  vim nginx.conf
+  113  ansible-playbook -i hosts  nginx_playbook.yml
+  114  vim nginx_playbook.yml
+  115  cp index.html index.html.j2
+  116  vim index.html.j2
+  117  ansible-playbook -i hosts  nginx_playbook.yml
+  118  vim index.html.j2
+  119  ansible -i hosts elliot-02 -m setup
+  120  vim index.html.j2
+  121  cat nginx_playbook.yml
+  122  cat index.html.j2
+  123  vim index.html.j2
+  124  ansible -i hosts elliot-02 -m setup
+  125  ansible-playbook -i hosts  nginx_playbook.yml
+  126  vim index.html.j2
+  127  cat nginx_playbook.yml
+  128  cat index.html.j2
+  129  ansible -i hosts elliot-02 -m setup
+  130  vim index.html.j2
+  131  ansible -i hosts elliot-02 -m setup
+  132  ansible -i hosts all -m setup -a "filter=ansible_distribution"
+  133  vim index.html.j2
+  134  ansible -i hosts all -m setup -a "filter=ansible_distribution"
+  135  ansible-playbook -i hosts  nginx_playbook.yml
+  136  vim index.html.j2
+  137  vim nginx_playbook.yml
+  138  history
+
+
