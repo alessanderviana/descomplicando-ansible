@@ -23,4 +23,5 @@
 - hosts: k8s-master
   become: yes
   user: ubuntu
+  roles:
   - install-helm

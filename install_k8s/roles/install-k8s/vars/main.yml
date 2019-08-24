@@ -1,2 +1,3 @@
 ---
 # vars file for install_k8s
+keypair: descomplicando-ansible
