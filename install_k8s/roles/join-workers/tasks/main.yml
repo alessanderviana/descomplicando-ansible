@@ -1,2 +1,4 @@
 ---
 # tasks file for join-workers
+# - include: allow-kubernetes-port.yml
+- include: join-workers.yml

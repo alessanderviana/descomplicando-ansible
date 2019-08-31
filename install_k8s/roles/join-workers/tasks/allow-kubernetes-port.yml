@@ -1,0 +1,6 @@
+ - name: Change security group
+   ec2_group:
+     name: '{{ ec2_group_name }}'
+     vpc_id: '{{ ec2_group_vpc }}'
+     region: '{{ ec2_group_region }}'
+     rules: '{{ rule_list }}'

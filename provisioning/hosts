@@ -1,7 +1,6 @@
 [local]
 localhost ansible_connection=local ansible_python_interpreter=python3 become=false gather_facts=false
 
-[kubernetes]
-100.26.140.92
-3.227.208.118
-34.204.182.67
+[public-ips]
+
+[private-ips]
