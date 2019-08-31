@@ -2,6 +2,6 @@
 localhost ansible_connection=local ansible_python_interpreter=python3 become=false gather_facts=false
 
 [kubernetes]
-3.214.215.89
-35.172.217.154
-34.239.156.23
+100.26.140.92
+3.227.208.118
+34.204.182.67
