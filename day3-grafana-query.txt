@@ -1,0 +1,2 @@
+
+sum(rate(nginx_http_requests{app="giropops"}[5m])) by (version)
