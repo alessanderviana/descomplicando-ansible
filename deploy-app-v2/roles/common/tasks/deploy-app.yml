@@ -1,0 +1,27 @@
+- name: Copying deployment file v1 to host
+  template:
+    src: app-v1.yml.j2
+    dest: /opt/giropops/app-v1.yml
+  register: copying_template_register
+
+- name: Copying deployment file v2 to host
+  template:
+    src: app-v2.yml.j2
+    dest: /opt/giropops/app-v2.yml
+  register: copying_template_register
+
+- name: Deploy new version of Giropops App deployment
+  shell: kubectl apply -f /opt/giropops/app-v2.yml
+  register: deploy_deployment_v2_register
+
+- name: Scale down old version of Giropops App deployment
+  shell: kubectl apply -f /opt/giropops/app-v1.yml
+  register: deploy_deployment_v1_register
+
+- name: The old version of Giropops App deployment will be removed in two minutes
+  pause:
+    minutes: 2
+
+- name: Delete old version of Giropops App deployment
+  shell: kubectl delete -f /opt/giropops/app-v1.yml
+  register: deployment_deleted_register
