@@ -1,0 +1,22 @@
+---
+- hosts: local
+  tasks:
+  - name: Adicionando o ip publico da instancia criada ao arquivo hosts
+    local_action: lineinfile
+      dest="./hosts"
+      regexp={{ item }}
+      insertafter="public-ips" line={{ item }}
+    with_items:
+      - 54.165.146.19
+      - 3.88.137.245
+      - 18.234.165.212
+
+  - name: Adicionando o ip privado da instancia criada no arquivo hosts
+    local_action: lineinfile
+      dest="./hosts"
+      regexp={{ item }}
+      insertafter='private-ips' line={{ item }}
+    with_items:
+      - 172.31.80.125
+      - 172.31.93.192
+      - 172.31.95.242
