@@ -4,7 +4,7 @@
     module: ec2_group
     name: "{{ security_group }}"
     description: Security Group Giropops
-    # profile: "{{ profile }}"
+    profile: "{{ profile }}"
     region: "{{ region }}"
     rules:
     - proto: tcp
@@ -28,31 +28,85 @@
       cidr_ip: 0.0.0.0/0
   register: basic_firewall
 
-- name: Criando a instancia EC2
+- name: Criando a instancia EC2 (kubernetes master)
   local_action: ec2
+    profile={{ profile }}
     group={{ security_group }}
     instance_type={{ instance_type }}
     image={{ image }}
     wait=true
     region={{ region }}
     keypair={{ keypair }}
-    count={{ count }}
+    count={{ masters_count }}
   register: ec2
 
-- name: Adicionando a instancia ao inventario temp
+- name: Criando o arquivo hosts full
+  copy:
+    dest: "../hosts"
+    content: |
+      [local]
+      localhost ansible_connection=local ansible_python_interpreter=python3 become=false gather_facts=false
+
+      [public-ips]
+
+      [private-ips]
+
+      [k8s-master]
+
+      [k8s-workers]
+
+      [workers:vars]
+      K8S_MASTER_NODE_IP=
+      K8S_API_SECURE_PORT=6443
+
+- name: Adicionando as instancias ao inventario temp
   add_host: name={{ item.public_ip }} groups=giropops
   with_items: "{{ ec2.instances }}"
 
-- name: Adicionando a instancia criada ao arquivo hosts
+- name: Adicionando as workers vars ao arquivo hosts
   local_action: lineinfile
-    dest="./hosts"
-    regexp={{ item.public_ip }}
-    insertafter="public-ips" line={{ item.public_ip }}
+    dest="../hosts"
+    regexp='^K8S_MASTER_NODE_IP=$'
+    line='K8S_MASTER_NODE_IP={{ item.private_ip }}'
   with_items: "{{ ec2.instances }}"
 
-- name: Adicionando o ip privado da instancia criada no arquivo hosts
+- name: Adicionando a instancia Master ao arquivo hosts
   local_action: lineinfile
-    dest="./hosts"
+    dest="../hosts"
+    regexp={{ item.regexp }}
+    insertafter={{ item.insertafter }} line={{ item.line }}
+  with_items:
+    - { regexp: "{{ ec2.instances.public_ip }}", insertafter: "public-ips", line: "{{ ec2.instances }}.public_ip" }
+    - { regexp: "{{ ec2.instances.public_ip }}", insertafter: "k8s-master", line: "{{ ec2.instances }}.public_ip" }
+
+- name: Criando a instancia EC2 (kubernetes workers)
+  local_action: ec2
+    profile={{ profile }}
+    group={{ security_group }}
+    instance_type={{ instance_type }}
+    image={{ image }}
+    wait=true
+    region={{ region }}
+    keypair={{ keypair }}
+    count={{ workers_count }}
+  register: ec2
+
+- name: Adicionando as instancias ao inventario temp
+  add_host: name={{ item.public_ip }} groups=giropops
+  with_items: "{{ ec2.instances }}"
+
+- name: Adicionando as instancias workers ao arquivo hosts
+  local_action: lineinfile
+    dest="../hosts"
+    regexp={{ item.regexp }}
+    insertafter={{ item.insertafter }} line={{ item.line }}
+  with_items:
+    - { regexp: "{{ ec2.instances.public_ip }}", insertafter: "public-ips", line: "{{ ec2.instances }}.public_ip" }
+    - { regexp: "{{ ec2.instances.public_ip }}", insertafter: "k8s-master", line: "{{ ec2.instances }}.public_ip" }
+
+- name: Adicionando o ip privado das instancias workers ao arquivo hosts
+  local_action: lineinfile
+    dest="../hosts"
     regexp={{ item.private_ip }}
     insertafter="private-ips" line={{ item.private_ip }}
   with_items: "{{ ec2.instances }}"
@@ -65,7 +119,7 @@
   with_items: "{{ ec2.instances }}"
 
 - name: Adicionando um nome TAG aa instancia
-  local_action: ec2_tag resource={{ item.id }} region={{ region }} state=present
+  local_action: ec2_tag resource={{ item.id }} region={{ region }} profile={{ profile }} state=present
   with_items: "{{ ec2.instances }}"
   args:
     tags:

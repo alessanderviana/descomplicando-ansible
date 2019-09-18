@@ -4,6 +4,7 @@ instance_type: t3.medium
 security_group: giropops
 image: ami-064a0193585662d74
 keypair: descomplicando-ansible
-# profile: alessander
+profile: alessander
 region: us-east-1
-count: 3
+masters_count: 1
+workers_count: 2
